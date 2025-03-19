@@ -24,7 +24,8 @@ module cpu(input reset,                     // positive reset signal
   wire[31:0] alu_in_2, alu_result;
   wire alu_bcond;
   wire[31:0] dout;
-  
+  wire[31:0] final_out;
+
   /***** Register declarations *****/
 
 
@@ -58,6 +59,13 @@ module cpu(input reset,                     // positive reset signal
     .rs2_dout (rs2_dout),     // output
     .print_reg (print_reg)  //DO NOT TOUCH THIS
   );
+
+  mux reg_mux(
+    .in0(final_out),
+    .in1(curr_pc+4),
+    .sel(pc_to_reg),
+    .out(rd_din),
+  )
 
 
   // ---------- Control Unit ----------
@@ -106,4 +114,11 @@ module cpu(input reset,                     // positive reset signal
     .mem_write (mem_write),  // input
     .dout (dout)        // output
   );
+
+  mux final_mux(
+    .in0(alu_result),
+    .in1(dout),
+    .sel(mem_to_reg),
+    .out(final_out)
+  )
 endmodule
