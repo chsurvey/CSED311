@@ -8,6 +8,8 @@
 // 3. You might need to describe combinational logics to drive them into the module (e.g., mux, and, or, ...)
 // 4. `include files if required
 
+`include "opcodes.v"
+
 module cpu(input reset,                     // positive reset signal
            input clk,                       // clock signal
            output is_halted,                // Whehther to finish simulation
@@ -58,7 +60,7 @@ module cpu(input reset,                     // positive reset signal
     .in0(curr_pc),
     .in1(4),
     .out(added_pc)
-  )
+  );
   
   // ---------- Instruction Memory ----------
   instruction_memory imem(
@@ -83,11 +85,11 @@ module cpu(input reset,                     // positive reset signal
   );
 
   mux reg_mux(
-    .in0(final_out),
-    .in1(added_pc),
-    .sel(pc_to_reg),
-    .out(rd_din),
-  )
+    .in0 (final_out),
+    .in1 (added_pc),
+    .sel (pc_to_reg),
+    .out (rd_din)
+  );
 
 
   // ---------- Control Unit ----------
@@ -115,7 +117,7 @@ module cpu(input reset,                     // positive reset signal
     .in0(curr_pc),
     .in1(imm_gen_out),
     .out(src1_in)
-  )
+  );
 
   // ---------- ALU Control Unit ----------
   alu_control_unit alu_ctrl_unit (
@@ -148,5 +150,5 @@ module cpu(input reset,                     // positive reset signal
     .in1(dout),
     .sel(mem_to_reg),
     .out(final_out)
-  )
+  );
 endmodule

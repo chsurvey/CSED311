@@ -7,7 +7,7 @@ module pc(input reset,
         if(reset) 
             current_pc = 0;
         else
-            current_pc = next_pc
+            current_pc = next_pc;
     end
 
 

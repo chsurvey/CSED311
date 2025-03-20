@@ -22,6 +22,6 @@ module control_unit(
         mem_write = part_of_inst==`STORE;
         mem_to_reg = part_of_inst==`LOAD;
         pc_to_reg = part_of_inst==`JAL || part_of_inst==`JALR;
-        is_ecall == part_of_inst==`ECALL;
+        is_ecall = part_of_inst==`ECALL;
     end
 endmodule
