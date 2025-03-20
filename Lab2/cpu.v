@@ -12,9 +12,10 @@ module cpu(input reset,                     // positive reset signal
            input clk,                       // clock signal
            output is_halted,                // Whehther to finish simulation
            output [31:0] print_reg [0:31]); // TO PRINT REGISTER VALUES IN TESTBENCH (YOU SHOULD NOT USE THIS)
+
   /***** Wire declarations *****/
-  wire[31:0] curr_pc;
-  wire[31:0] next_pc
+  wire[31:0] curr_pc, added_pc;
+  wire[31:0] next_pc;
   wire[31:0] inst;
   wire[31:0] rd_din;
   wire[31:0] rs1_dout, rs2_dout;
@@ -24,19 +25,40 @@ module cpu(input reset,                     // positive reset signal
   wire[31:0] alu_in_2, alu_result;
   wire alu_bcond;
   wire[31:0] dout;
-  wire[31:0] final_out;
+  wire[31:0] src1_in, sr2c_in, final_out;
+
 
   /***** Register declarations *****/
 
 
   // ---------- Update program counter ----------
   // PC must be updated on the rising edge (positive edge) of the clock.
+  mux mux_src1(
+    .in0(added_pc),
+    .in1(src1_in),
+    .sel(is_jal),
+    .out(sr2c_in)
+  );
+
+  mux mux_src2(
+    .in0(sr2c_in),
+    .in1(alu_result),
+    .sel(is_jalr),
+    .out(next_pc)
+  );
+
   pc pc(
     .reset(reset),       // input (Use reset to initialize PC. Initial value must be 0)
     .clk(clk),         // input
     .next_pc(next_pc),     // input
     .current_pc(curr_pc)   // output
   );
+
+  add pc_add(
+    .in0(curr_pc),
+    .in1(4),
+    .out(added_pc)
+  )
   
   // ---------- Instruction Memory ----------
   instruction_memory imem(
@@ -62,7 +84,7 @@ module cpu(input reset,                     // positive reset signal
 
   mux reg_mux(
     .in0(final_out),
-    .in1(curr_pc+4),
+    .in1(added_pc),
     .sel(pc_to_reg),
     .out(rd_din),
   )
@@ -88,6 +110,12 @@ module cpu(input reset,                     // positive reset signal
     .part_of_inst(inst),  // input
     .imm_gen_out(imm_gen_out)    // output
   );
+
+  add pc_imm_add(
+    .in0(curr_pc),
+    .in1(imm_gen_out),
+    .out(src1_in)
+  )
 
   // ---------- ALU Control Unit ----------
   alu_control_unit alu_ctrl_unit (
