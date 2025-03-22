@@ -18,6 +18,7 @@ module cpu(input reset,                     // positive reset signal
   /***** Wire declarations *****/
   wire[31:0] curr_pc, added_pc;
   wire[31:0] next_pc;
+  wire PcSrc1, PcSrc2;
   wire[31:0] inst;
   wire[31:0] rd_din;
   wire[31:0] rs1_dout, rs2_dout;
@@ -35,17 +36,20 @@ module cpu(input reset,                     // positive reset signal
 
   // ---------- Update program counter ----------
   // PC must be updated on the rising edge (positive edge) of the clock.
+  assign PcSrc1 = is_jal || (branch && alu_bcond);
+  assign PcSrc2 = is_jalr;
+
   mux mux_src1(
     .in0(added_pc),
     .in1(src1_in),
-    .sel(is_jal),
+    .sel(PcSrc1),
     .out(sr2c_in)
   );
 
   mux mux_src2(
     .in0(sr2c_in),
     .in1(alu_result),
-    .sel(is_jalr),
+    .sel(PcSrc2),
     .out(next_pc)
   );
 
