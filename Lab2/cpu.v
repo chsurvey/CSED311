@@ -25,7 +25,7 @@ module cpu(input reset,                     // positive reset signal
   wire is_jal, is_jalr, branch, mem_read, mem_to_reg, mem_write, alu_src, write_enable, pc_to_reg, is_ecall;
   wire[31:0] imm_gen_out;
   wire[4:0] alu_op;
-  wire[31:0] alu_in_2, alu_result;
+  wire[31:0] alu_in_2;
   wire alu_bcond;
   wire[31:0] dout;
   wire[31:0] src1_in, sr2c_in, final_out;
@@ -34,6 +34,7 @@ module cpu(input reset,                     // positive reset signal
   /***** Register declarations *****/
   reg [31:0] x17;
   reg _is_halted;
+  reg [31:0] alu_result;
 
   // ---------- Update program counter ----------
   // PC must be updated on the rising edge (positive edge) of the clock.

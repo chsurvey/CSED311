@@ -22,8 +22,11 @@ module register_file(input	reset,
   always @(*) begin
     rs1_dout = rf[rs1];
     rs2_dout = rf[rs2];
+  end
+
+  always @(posedge clk) begin
     if(write_enable)
-      rf[rd] = rd_din;
+      rf[rd] <= rd_din; 
   end
 
   // Initialize register file (do not touch)
