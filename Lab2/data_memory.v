@@ -25,7 +25,7 @@ module data_memory #(parameter MEM_DEPTH = 16384) (input reset,
     if(mem_read)
       dout = mem[dmem_addr];
     else
-      dout = 32'bz;
+      dout = 32'b0;
   end
 
   always @(posedge clk) begin

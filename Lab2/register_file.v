@@ -7,7 +7,7 @@ module register_file(input	reset,
                      input write_enable,          // RegWrite signal
                      output reg [31:0] rs1_dout,   // output of rs 1
                      output reg [31:0] rs2_dout,   // output of rs 2
-                     output reg [31:0] x17,
+                     output [31:0] x17,
                      output [31:0] print_reg [0:31]);
   integer i;
   // Register file
@@ -20,8 +20,8 @@ module register_file(input	reset,
   // Asynchronously read register file
   // Synchronously write data to the register file
   always @(*) begin
-    rs1_dout = rf[rs1];
-    rs2_dout = rf[rs2];
+    rs1_dout = (rs1 != 0) ? rf[rs1] : 0;
+    rs2_dout = (rs2 != 0) ? rf[rs2] : 0;
   end
 
   always @(posedge clk) begin

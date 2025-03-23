@@ -32,7 +32,7 @@ module cpu(input reset,                     // positive reset signal
 
 
   /***** Register declarations *****/
-  reg [31:0] x17;
+  wire [31:0] x17;
   reg _is_halted;
   reg [31:0] alu_result;
 
@@ -165,7 +165,6 @@ module cpu(input reset,                     // positive reset signal
     .sel(mem_to_reg),
     .out(final_out)
   );
-
 
   assign is_halted = _is_halted;
 
