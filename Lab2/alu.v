@@ -43,6 +43,33 @@ module alu(
             5'b01010: // BGE
                 alu_bcond = alu_in_1 >= alu_in_2;
 
+            5'b01011: // ID
+                alu_result = alu_in_1;
+
+            5'b01100: // NOT
+                alu_result = ~alu_in_1;
+
+            5'b01101: // NAND
+                alu_result = ~(alu_in_1 & alu_in_2);
+
+            5'b01110: // NOR
+                alu_result = ~(alu_in_1 | alu_in_2);
+
+            5'b01111: // XNOR
+                alu_result = ~(alu_in_1 ^ alu_in_2);
+
+            5'b10000: // ALS
+                alu_result = alu_in_1 <<< alu_in_2[4:0];
+
+            5'b10001: // ARS
+                alu_result = alu_in_1 >>> alu_in_2[4:0];
+
+            5'b10010: // TCP
+                alu_result = ~alu_in_1 + 1;
+
+            5'b10011: // ZERO
+                alu_result = 0;
+
             default: begin
             end
         endcase
