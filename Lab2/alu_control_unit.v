@@ -13,10 +13,10 @@ module alu_control_unit (
     assign opcode = part_of_inst[6:0];
 
     always @(*) begin        
-        alu_op = 5'b00000;
+        alu_op = 5'b00000; // default operation (alu return 0)
         case(opcode)
             `ARITHMETIC: begin
-                case(func7)
+                case(funct7)
                     `FUNCT7_OTHERS: begin
                         case (funct3)
                             `FUNCT3_ADD: alu_op = // alu op code
