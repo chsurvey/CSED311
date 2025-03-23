@@ -16,7 +16,7 @@ module immediate_generator(
             `STORE:
                 imm_gen_out = {{20{imm_S[11]}}, imm_S};
             `JAL:
-                imm_gen_out = {{12{imm_UJ[20]}}, imm_UJ};
+                imm_gen_out = {{11{imm_UJ[20]}}, imm_UJ};
             `BRANCH:
                 imm_gen_out = {{19{imm_SB[12]}}, imm_SB};
             default:

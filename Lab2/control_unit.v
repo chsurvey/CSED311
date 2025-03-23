@@ -1,5 +1,5 @@
 module control_unit(
-    input part_of_inst,
+    input [6:0] part_of_inst,
     output reg is_jal,
     output reg is_jalr,
     output reg branch,

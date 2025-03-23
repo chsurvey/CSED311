@@ -42,7 +42,7 @@ module alu_control_unit (
                 endcase
             end
             `ARITHMETIC_IMM: begin
-                case(func3)
+                case(funct3)
                     `FUNCT3_ADD: alu_op = 5'b00000; // alu op code
                     `FUNCT3_AND: alu_op = 5'b00001;
                     `FUNCT3_OR: alu_op = 5'b00010;

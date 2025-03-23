@@ -5,15 +5,17 @@ module register_file(input	reset,
                      input [4:0] rd,           // destination register
                      input [31:0] rd_din,      // input data for rd
                      input write_enable,          // RegWrite signal
-                     output [31:0] rs1_dout,   // output of rs 1
-                     output [31:0] rs2_dout,   // output of rs 2
+                     output reg [31:0] rs1_dout,   // output of rs 1
+                     output reg [31:0] rs2_dout,   // output of rs 2
+                     output reg [31:0] x17,
                      output [31:0] print_reg [0:31]);
   integer i;
   // Register file
   reg [31:0] rf[0:31];
   // Do not touch or use print_reg
   assign print_reg = rf;
-
+  assign x17 = rf[17];
+  
   // TODO
   // Asynchronously read register file
   // Synchronously write data to the register file

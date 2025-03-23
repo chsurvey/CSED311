@@ -32,7 +32,8 @@ module cpu(input reset,                     // positive reset signal
 
 
   /***** Register declarations *****/
-
+  reg [31:0] x17;
+  reg _is_halted;
 
   // ---------- Update program counter ----------
   // PC must be updated on the rising edge (positive edge) of the clock.
@@ -80,11 +81,12 @@ module cpu(input reset,                     // positive reset signal
     .clk (clk),          // input
     .rs1 (inst[19:15]),          // input
     .rs2 (inst[24:20]),          // input
-    .rd (inst[11:17]),           // input
+    .rd (inst[11:7]),           // input
     .rd_din (rd_din),       // input
     .write_enable (write_enable), // input
     .rs1_dout (rs1_dout),     // output
     .rs2_dout (rs2_dout),     // output
+    .x17(x17),
     .print_reg (print_reg)  //DO NOT TOUCH THIS
   );
 
@@ -125,7 +127,7 @@ module cpu(input reset,                     // positive reset signal
 
   // ---------- ALU Control Unit ----------
   alu_control_unit alu_ctrl_unit (
-    .part_of_inst({inst[30], inst[14:12], inst[6:0]}),  // input
+    .part_of_inst({inst[31:25], inst[14:12], inst[6:0]}),  // input
     .alu_op(alu_op)         // output
   );
 
@@ -137,6 +139,13 @@ module cpu(input reset,                     // positive reset signal
     .alu_result(alu_result),  // output
     .alu_bcond(alu_bcond)    // output
   );
+
+  mux alu_mux(
+    .in0 (rs2_dout),
+    .in1 (imm_gen_out),
+    .sel (alu_src),
+    .out (alu_in_2)
+    );
 
   // ---------- Data Memory ----------
   data_memory dmem(
@@ -155,4 +164,16 @@ module cpu(input reset,                     // positive reset signal
     .sel(mem_to_reg),
     .out(final_out)
   );
+
+
+  assign is_halted = _is_halted;
+
+  always @(*) begin
+    if (is_ecall && x17 == 10) begin
+      _is_halted = 1;
+    end
+    else begin
+      _is_halted = 0;
+    end
+  end
 endmodule
