@@ -19,12 +19,12 @@ module alu_control_unit (
                 case(funct7)
                     `FUNCT7_OTHERS: begin
                         case (funct3)
-                            `FUNCT3_ADD: alu_op = // alu op code
-                            `FUNCT3_AND: alu_op
-                            `FUNCT3_OR: alu_op
-                            `FUNCT3_XOR: alu_op
-                            `FUNCT3_SLL: alu_op
-                            `FUNCT3_SRL: alu_op
+                            `FUNCT3_ADD: alu_op = 5'b00000; // alu op code
+                            `FUNCT3_AND: alu_op = 5'b00001;
+                            `FUNCT3_OR: alu_op = 5'b00010;
+                            `FUNCT3_XOR: alu_op = 5'b00011;
+                            `FUNCT3_SLL: alu_op = 5'b00100;
+                            `FUNCT3_SRL: alu_op = 5'b00101;
                             default: begin
                             end
                         endcase
@@ -32,7 +32,7 @@ module alu_control_unit (
 
                     `FUNCT7_SUB: begin
                         case (funct3)
-                            `FUNCT3_SUB: alu_op
+                            `FUNCT3_SUB: alu_op = 5'b00110;
                             default: begin
                             end
                         endcase
@@ -43,29 +43,29 @@ module alu_control_unit (
             end
             `ARITHMETIC_IMM: begin
                 case(func3)
-                    `FUNCT3_ADD: alu_op = // alu op code
-                    `FUNCT3_AND: alu_op
-                    `FUNCT3_OR: alu_op
-                    `FUNCT3_XOR: alu_op
-                    `FUNCT3_SLL: alu_op
-                    `FUNCT3_SRL: alu_op
+                    `FUNCT3_ADD: alu_op = 5'b00000; // alu op code
+                    `FUNCT3_AND: alu_op = 5'b00001;
+                    `FUNCT3_OR: alu_op = 5'b00010;
+                    `FUNCT3_XOR: alu_op = 5'b00011;
+                    `FUNCT3_SLL: alu_op = 5'b00100;
+                    `FUNCT3_SRL: alu_op = 5'b00101;
                     default: begin
                     end
                 endcase
             end
             `LOAD: begin
                 case(funct3)
-                    `FUNCT3_LW: alu_op // alu op for addition
+                    `FUNCT3_LW: alu_op = 5'b00000; // alu op for addition
                     default: begin
                     end
                 endcase
             end
             `JALR: begin
-                alu_op = // alu op for addition
+                alu_op = 5'b00000; // alu op for addition
             end
             `STORE: begin
                 case(funct3)
-                    `FUNCT3_SW: alu_op = // alu op for addition
+                    `FUNCT3_SW: alu_op = 5'b00000; // alu op for addition
                     default: begin
                     end
                 endcase
@@ -73,16 +73,16 @@ module alu_control_unit (
             `BRANCH: begin
                 
             case(funct3)
-                `FUNCT3_BEQ: alu_op
-                `FUNCT3_BNE: alu_op
-                `FUNCT3_BLT: alu_op
-                `FUNCT3_BGE: alu_op
+                `FUNCT3_BEQ: alu_op = 5'b00111;
+                `FUNCT3_BNE: alu_op = 5'b01000;
+                `FUNCT3_BLT: alu_op = 5'b01001;
+                `FUNCT3_BGE: alu_op = 5'b01010;
                 default: begin
                 end
             endcase
             end
             `JAL: begin
-                alu_op = // alu op for addition
+                alu_op = 5'b00000; // alu op for addition
             end
             default: begin
             end
