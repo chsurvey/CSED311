@@ -1,4 +1,8 @@
+`include "states.v"
+
 module ControlUnit(
+    input reset,
+    input clk,
     input[6:0] part_of_inst,
     output reg IR_write,
     output reg IorD,
@@ -14,5 +18,21 @@ module ControlUnit(
     output reg pc_src,
     output reg is_ecall
 );
+    reg [2:0] current_state;
+    wire [2:0] next_state;
 
+    fsm fsm(
+        .opcode(part_of_inst),
+        .current_state(current_state),
+        .next_state(next_state)
+    );
+
+    always @(posedge clk) begin
+        if (reset)
+            current_state <= `IF1;
+        else
+            current_state <= next_state;
+    end
+
+    
 endmodule
