@@ -2,6 +2,7 @@
 
 module ALUControlUnit (
     input[16:0] part_of_inst,
+    input alu_ctrl_op,
     output reg[4:0] alu_op
   );
     wire [6:0] funct7;
@@ -13,79 +14,84 @@ module ALUControlUnit (
     assign opcode = part_of_inst[6:0];
 
     always @(*) begin        
-        alu_op = 5'b00000; // default operation (alu return 0)
-        case(opcode)
-            `ARITHMETIC: begin
-                case(funct7)
-                    `FUNCT7_OTHERS: begin
-                        case (funct3)
-                            `FUNCT3_ADD: alu_op = 5'b00000; // alu op code
-                            `FUNCT3_AND: alu_op = 5'b00001;
-                            `FUNCT3_OR: alu_op = 5'b00010;
-                            `FUNCT3_XOR: alu_op = 5'b00011;
-                            `FUNCT3_SLL: alu_op = 5'b00100;
-                            `FUNCT3_SRL: alu_op = 5'b00101;
-                            default: begin
-                            end
-                        endcase
-                    end
+        alu_op = 5'b10011;
+        if(alu_ctrl_op == 1'b0) begin
+            alu_op = 5'b00000;
+        end
+        else begin
+            case(opcode)
+                `ARITHMETIC: begin
+                    case(funct7)
+                        `FUNCT7_OTHERS: begin
+                            case (funct3)
+                                `FUNCT3_ADD: alu_op = 5'b00000; // alu op code
+                                `FUNCT3_AND: alu_op = 5'b00001;
+                                `FUNCT3_OR: alu_op = 5'b00010;
+                                `FUNCT3_XOR: alu_op = 5'b00011;
+                                `FUNCT3_SLL: alu_op = 5'b00100;
+                                `FUNCT3_SRL: alu_op = 5'b00101;
+                                default: begin
+                                end
+                            endcase
+                        end
 
-                    `FUNCT7_SUB: begin
-                        case (funct3)
-                            `FUNCT3_SUB: alu_op = 5'b00110;
-                            default: begin
-                            end
-                        endcase
-                    end
-                    default: begin
-                    end
-                endcase
-            end
-            `ARITHMETIC_IMM: begin
+                        `FUNCT7_SUB: begin
+                            case (funct3)
+                                `FUNCT3_SUB: alu_op = 5'b00110;
+                                default: begin
+                                end
+                            endcase
+                        end
+                        default: begin
+                        end
+                    endcase
+                end
+                `ARITHMETIC_IMM: begin
+                    case(funct3)
+                        `FUNCT3_ADD: alu_op = 5'b00000; // alu op code
+                        `FUNCT3_AND: alu_op = 5'b00001;
+                        `FUNCT3_OR: alu_op = 5'b00010;
+                        `FUNCT3_XOR: alu_op = 5'b00011;
+                        `FUNCT3_SLL: alu_op = 5'b00100;
+                        `FUNCT3_SRL: alu_op = 5'b00101;
+                        default: begin
+                        end
+                    endcase
+                end
+                `LOAD: begin
+                    case(funct3)
+                        `FUNCT3_LW: alu_op = 5'b00000; // alu op for addition
+                        default: begin
+                        end
+                    endcase
+                end
+                `JALR: begin
+                    alu_op = 5'b00000; // alu op for addition
+                end
+                `STORE: begin
+                    case(funct3)
+                        `FUNCT3_SW: alu_op = 5'b00000; // alu op for addition
+                        default: begin
+                        end
+                    endcase
+                end
+                `BRANCH: begin
+                    
                 case(funct3)
-                    `FUNCT3_ADD: alu_op = 5'b00000; // alu op code
-                    `FUNCT3_AND: alu_op = 5'b00001;
-                    `FUNCT3_OR: alu_op = 5'b00010;
-                    `FUNCT3_XOR: alu_op = 5'b00011;
-                    `FUNCT3_SLL: alu_op = 5'b00100;
-                    `FUNCT3_SRL: alu_op = 5'b00101;
+                    `FUNCT3_BEQ: alu_op = 5'b00111;
+                    `FUNCT3_BNE: alu_op = 5'b01000;
+                    `FUNCT3_BLT: alu_op = 5'b01001;
+                    `FUNCT3_BGE: alu_op = 5'b01010;
                     default: begin
                     end
                 endcase
-            end
-            `LOAD: begin
-                case(funct3)
-                    `FUNCT3_LW: alu_op = 5'b00000; // alu op for addition
-                    default: begin
-                    end
-                endcase
-            end
-            `JALR: begin
-                alu_op = 5'b00000; // alu op for addition
-            end
-            `STORE: begin
-                case(funct3)
-                    `FUNCT3_SW: alu_op = 5'b00000; // alu op for addition
-                    default: begin
-                    end
-                endcase
-            end
-            `BRANCH: begin
-                
-            case(funct3)
-                `FUNCT3_BEQ: alu_op = 5'b00111;
-                `FUNCT3_BNE: alu_op = 5'b01000;
-                `FUNCT3_BLT: alu_op = 5'b01001;
-                `FUNCT3_BGE: alu_op = 5'b01010;
+                end
+                `JAL: begin
+                    alu_op = 5'b00000; // alu op for addition
+                end
                 default: begin
                 end
             endcase
-            end
-            `JAL: begin
-                alu_op = 5'b00000; // alu op for addition
-            end
-            default: begin
-            end
-        endcase
+        end
     end
 endmodule

@@ -4,30 +4,47 @@
 module fsm(
     input [6:0] opcode,
     input [2:0] current_state,
+    input bcond,
     output reg [2:0] next_state
 );
     always @(*) begin
         case (current_state)
             `IF1: next_state = `IF2;
-            `IF2: next_state = `IF3;
-            `IF3: next_state = `IF4;
-            `IF4: next_state = (opcode == `JAL) ? `EX1 : `ID;
-            `ID: next_state = `EX1;
-            `EX1: next_state = `EX2;
-            `EX2: begin
-                case(opcode)
-                    `ARITHMETIC, `ARITHMETIC_IMM, `JAL, `JALR: next_state = `WB;
-                    `LOAD: next_state = `MEM1;
-                    `STORE: next_state = `MEM1;
-                    `BRANCH: next_state = `IF1;
-                endcase
+            `IF2: begin
+                if (opcode == `ECALL)
+                    next_state = `IF1;
+                else if (opcode == `JAL) 
+                    next_state = `EX1; 
+                else
+                    next_state = `ID; 
             end
-            `MEM1: next_state = `MEM2;
-            `MEM2: next_state = `MEM3;
-            `MEM3: next_state = `MEM4;
-            `MEM4: next_state = (opcode == `LOAD) ? `WB : `IF1;
+            `ID: next_state = `EX1;
+            `EX1: begin
+                if (opcode == `BRANCH && bcond)
+                    next_state = `EX2;
+                else if (opcode == `BRANCH && !bcond)
+                    next_state = `IF1;
+
+                else begin
+                    if (opcode == `ARITHMETIC || opcode == `ARITHMETIC_IMM || opcode == `JAL || opcode == `JALR)
+                        next_state = `WB;
+                    else if (opcode == `LOAD || opcode == `STORE)
+                        next_state = `MEM;
+                    else
+                        next_state = `IF1;
+                end
+            end
+            `EX2: next_state = `IF1;
+            `MEM: begin
+                if (opcode == `LOAD)
+                    next_state = `WB;
+                else if (opcode == `STORE)
+                    next_state = `IF1;
+                else
+                    next_state = `IF1;
+            end
             `WB: next_state = `IF1;            
-            default: next_state = current_state; // Stay in the same state for any other case
+            default: next_state = current_state;
         endcase
     end
 

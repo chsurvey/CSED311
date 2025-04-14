@@ -34,7 +34,7 @@ module cpu(input reset,       // positive reset signal
   wire[31:0] alu_in_1, alu_in_2;
   wire[31:0] rd_din;
   wire[31:0] alu_result;
-  wire alu_bcond;
+  wire alu_bcond, alu_ctrl_op;
   wire IorD, mem_read, mem_write, mem_to_reg, alu_src_a, reg_write, IR_write, pc_write, pc_write_not_cond, final_pc_write, pc_src;
   wire[1:0] alu_src_b;
   wire[4:0] alu_op;
@@ -112,6 +112,9 @@ module cpu(input reset,       // positive reset signal
   
   // ---------- Control Unit ----------
   ControlUnit ctrl_unit(
+    .reset(reset),       // input
+    .clk(clk),         // input
+    .bcond(alu_bcond),     // input
     .part_of_inst(IR[6:0]),  // input
     .IR_write(IR_write),    // output
     .IorD(IorD),          // output
@@ -123,7 +126,7 @@ module cpu(input reset,       // positive reset signal
     .reg_write(reg_write),    // output
     .pc_write(pc_write),      // output
     .pc_write_not_cond(pc_write_not_cond), // output
-    .alu_op(alu_op),        // output
+    .alu_op(alu_ctrl_op),        // output
     .pc_src(pc_src),      // output
     .is_ecall(is_ecall)       // output (ecall inst)
   );
@@ -137,6 +140,7 @@ module cpu(input reset,       // positive reset signal
   // ---------- ALU Control Unit ----------
   ALUControlUnit alu_ctrl_unit(
     .part_of_inst({IR[31:25], IR[14:12], IR[6:0]}),  // input
+    .alu_ctrl_op(alu_ctrl_op),  // input
     .alu_op(alu_op)         // output
   );
 
