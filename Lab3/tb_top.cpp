@@ -28,7 +28,7 @@ void next_cycle(Vtop* dut, VerilatedVcdC* m_trace) {
 
 int main(int argc, char** argv, char** env) {
     // TO DO : CHANGE "filename" TO PROVIDED "answer_*.txt" PATH
-    string filename = "/home/justin8021/lab/Lab3/student_tb/answer_basic.txt";
+    string filename = "/home/justin8021/lab/Lab3/student_tb/answer_recursive.txt";
     ifstream file(filename);
     stringstream ss;
     string reg_hex;
@@ -60,8 +60,25 @@ int main(int argc, char** argv, char** env) {
     dut->eval();
     m_trace->dump(sim_time++);
 
+    
+    uint32_t prev_reg[32] = {0};
+
     while (sim_time < MAX_SIM_TIME) {
         next_cycle(dut, m_trace);
+
+        // cout << dut->print_reg[1] << endl;
+        // for (int i = 0; i < 32; i++) {
+        //     uint32_t current_value = dut->print_reg[i];
+            // if (prev_reg[i] != current_value) {
+            //     cout << "Register " << i << " changed: " 
+            //          << setfill('0') << prev_reg[i] 
+            //          << " -> " 
+            //          << setfill('0') << current_value 
+            //          << endl;
+            //     prev_reg[i] = current_value;
+            // }
+        // }
+
         if (dut->is_halted == 1) break;
     }
 

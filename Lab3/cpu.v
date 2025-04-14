@@ -25,6 +25,7 @@ module cpu(input reset,       // positive reset signal
   reg [31:0] ALUOut; // ALU output register
   // Do not modify and use registers declared above.
 
+  reg [4:0] rs1; 
   wire[31:0] curr_pc;
   wire[31:0] next_pc;
   wire[31:0] addr;
@@ -58,14 +59,29 @@ module cpu(input reset,       // positive reset signal
     end
   end
 
-  assign pc_write = (pc_write_not_cond & !alu_bcond) | pc_write ? 1 : 0;
+  assign final_pc_write = (pc_write_not_cond & !alu_bcond) | pc_write;
+
+  always @(*) begin
+        if (is_ecall) begin
+            rs1 = 5'b10001;
+        end else begin
+            rs1 = IR[19:15]; 
+        end
+  end
 
   // ---------- Update program counter ----------
   // PC must be updated on the rising edge (positive edge) of the clock.
+  mux2 next_pc_mux(
+    .in0(alu_result),
+    .in1(ALUOut),
+    .sel(pc_src),
+    .out(next_pc)
+  );
+
   pc pc(
     .reset(reset),       // input (Use reset to initialize PC. Initial value must be 0)
     .clk(clk),         // input
-    .pc_write(pc_write), // input (PC write enable signal)
+    .pc_write(final_pc_write), // input (PC write enable signal)
     .next_pc(next_pc),     // input
     .current_pc(curr_pc)   // output
   );
@@ -81,7 +97,7 @@ module cpu(input reset,       // positive reset signal
   RegisterFile reg_file(
     .reset(reset),        // input
     .clk(clk),          // input
-    .rs1(IR[19:15]),          // input
+    .rs1(rs1),          // input
     .rs2(IR[24:20]),          // input
     .rd(IR[11:7]),           // input
     .rd_din(rd_din),       // input
@@ -104,7 +120,7 @@ module cpu(input reset,       // positive reset signal
     .reset(reset),        // input
     .clk(clk),          // input
     .addr(addr),         // input
-    .din(din),          // input
+    .din(rs2_dout),          // input
     .mem_read(mem_read),     // input
     .mem_write(mem_write),    // input
     .dout(dout)          // output

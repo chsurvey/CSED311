@@ -53,6 +53,9 @@ module ControlUnit(
         mem_write = 0;
         mem_to_reg = 0;
         is_ecall = 0;
+        IorD = 0;
+        IR_write = 0;
+        mem_read = 0;
         
         case (current_state)
             `IF1 : begin
@@ -62,8 +65,10 @@ module ControlUnit(
             end
 
             `IF2 : begin
-                if (part_of_inst == `ECALL)
+                if (part_of_inst == `ECALL) begin
+                    pc_write = 1;
                     is_ecall = 1;
+                end
 
                 else begin
                     mem_read = 1;
@@ -78,7 +83,7 @@ module ControlUnit(
                 alu_op = 0;
             end
 
-            `EX1 : begin
+            `EX : begin
                 if (part_of_inst == `ARITHMETIC) begin
                     alu_src_a = 1;
                     alu_src_b = 2'b00; 
@@ -106,29 +111,9 @@ module ControlUnit(
                 end
             end
 
-            `EX2 : begin 
-                alu_src_a = 0;
-                alu_src_b = 2'b10; 
-                alu_op = 0;
-                pc_write = 1; 
-                pc_src = 0;
-            end
-
             `MEM : begin
-                if (part_of_inst == `LOAD) begin
-                    mem_read = 1;
-                    IorD = 1;
-                end
-
-                else if (part_of_inst == `STORE) begin
-                    mem_write = 1;
-                    IorD = 1;
-                    alu_src_a = 0;
-                    alu_src_b = 2'b01;
-                    alu_op = 0;
-                    pc_write = 1; 
-                    pc_src = 0; 
-                end
+                mem_read = 1;
+                IorD = 1;
             end
 
             `WB : begin
@@ -152,6 +137,16 @@ module ControlUnit(
                     pc_write = 1; 
                     pc_src = 0; 
                 end
+                
+                else if (part_of_inst == `STORE) begin
+                    mem_write = 1;
+                    IorD = 1;
+                    alu_src_a = 0;
+                    alu_src_b = 2'b01;
+                    alu_op = 0;
+                    pc_write = 1;
+                    pc_src = 0; 
+                end
 
                 else if (part_of_inst == `JAL) begin
                     reg_write = 1;
@@ -172,20 +167,16 @@ module ControlUnit(
                     pc_write = 1; 
                     pc_src = 0; 
                 end
+
+                else if (part_of_inst == `BRANCH) begin
+                    alu_src_a = 0;
+                    alu_src_b = 2'b10; 
+                    alu_op = 0;
+                    pc_write = 1; 
+                    pc_src = 0;
+                end
             end
             default: begin
-                IorD = 0;
-                IR_write = 0;
-                pc_src = 0;
-                pc_write = 0;
-                pc_write_not_cond = 0;
-                alu_op = 0;
-                alu_src_a = 0; // Default: PC <- PC + 4
-                alu_src_b = 2'b01; // Default: PC <- PC + 4
-                reg_write = 0;
-                mem_read = 0;
-                mem_write = 0;
-                mem_to_reg = 0;
                 is_ecall = 1; 
             end
         endcase

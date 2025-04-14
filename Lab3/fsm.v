@@ -14,37 +14,37 @@ module fsm(
                 if (opcode == `ECALL)
                     next_state = `IF1;
                 else if (opcode == `JAL) 
-                    next_state = `EX1; 
+                    next_state = `EX; 
                 else
                     next_state = `ID; 
             end
-            `ID: next_state = `EX1;
-            `EX1: begin
+            `ID: next_state = `EX;
+            `EX: begin
                 if (opcode == `BRANCH && bcond)
-                    next_state = `EX2;
+                    next_state = `WB;
                 else if (opcode == `BRANCH && !bcond)
                     next_state = `IF1;
 
                 else begin
                     if (opcode == `ARITHMETIC || opcode == `ARITHMETIC_IMM || opcode == `JAL || opcode == `JALR)
                         next_state = `WB;
-                    else if (opcode == `LOAD || opcode == `STORE)
+                    else if (opcode == `LOAD)
                         next_state = `MEM;
+                    else if (opcode == `STORE)
+                        next_state = `WB;
                     else
                         next_state = `IF1;
                 end
             end
-            `EX2: next_state = `IF1;
+            
             `MEM: begin
                 if (opcode == `LOAD)
                     next_state = `WB;
-                else if (opcode == `STORE)
-                    next_state = `IF1;
                 else
                     next_state = `IF1;
             end
             `WB: next_state = `IF1;            
-            default: next_state = current_state;
+            default: next_state = `IF1;
         endcase
     end
 
