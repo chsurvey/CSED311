@@ -1,4 +1,4 @@
-module mux(
+module mux2(
     input wire [31:0] in0, 
     input wire [31:0] in1, 
     input wire sel, 

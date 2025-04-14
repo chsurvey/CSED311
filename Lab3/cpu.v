@@ -8,6 +8,8 @@
 // 3. You might need to describe combinational logics to drive them into the module (e.g., mux, and, or, ...)
 // 4. `include files if required
 
+`include "opcodes.v"
+
 module cpu(input reset,       // positive reset signal
            input clk,         // clock signal
            output is_halted,
@@ -32,11 +34,11 @@ module cpu(input reset,       // positive reset signal
   wire[31:0] alu_in_1, alu_in_2;
   wire[31:0] rd_din;
   wire[31:0] alu_result;
-  wire[31:0] alu_bcond;
+  wire alu_bcond;
   wire IorD, mem_read, mem_write, mem_to_reg, alu_src_a, reg_write, IR_write, pc_write, pc_write_not_cond, final_pc_write, pc_src;
   wire[1:0] alu_src_b;
   wire[4:0] alu_op;
-  wire is_ecall, is_halted;
+  wire is_ecall;
 
   assign is_halted = (is_ecall && rs1_dout == 10)? 1:0;
 
@@ -48,8 +50,8 @@ module cpu(input reset,       // positive reset signal
       B <= 0;
       ALUOut <= 0;
     end else begin
-      if (!i_or_d && ir_write) IR <= dout;
-      if (i_or_d) MDR <= dout;
+      if (!IorD && IR_write) IR <= dout;
+      if (IorD) MDR <= dout;
       A <= rs1_dout;
       B <= rs2_dout;
       ALUOut <= alu_result;
@@ -134,7 +136,7 @@ module cpu(input reset,       // positive reset signal
 
   // ---------- ALU Control Unit ----------
   ALUControlUnit alu_ctrl_unit(
-    .part_of_inst({inst[31:25], inst[14:12], inst[6:0]}),  // input
+    .part_of_inst({IR[31:25], IR[14:12], IR[6:0]}),  // input
     .alu_op(alu_op)         // output
   );
 
