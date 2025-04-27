@@ -30,7 +30,7 @@ module cpu(input reset,       // positive reset signal
   wire pc_to_reg;
   wire is_ecall;
   wire [31:0] imm_gen_out;
-  wire [3:0] alu_op;
+  wire [4:0] alu_op;
   wire [31:0] alu_in_2;
   wire [31:0] alu_result;
   wire alu_bcond;
@@ -62,11 +62,11 @@ module cpu(input reset,       // positive reset signal
   reg ID_EX_mem_to_reg;     // will be used in WB stage
   reg ID_EX_reg_write;      // will be used in WB stage
   // From others
-  reg ID_EX_rs1_data;
-  reg ID_EX_rs2_data;
-  reg ID_EX_imm;
-  reg ID_EX_ALU_ctrl_unit_input;
-  reg ID_EX_rd;
+  reg [31:0] ID_EX_rs1_data;
+  reg [31:0] ID_EX_rs2_data;
+  reg [31:0] ID_EX_imm;
+  reg [16:0] ID_EX_ALU_ctrl_unit_input;
+  reg [4:0] ID_EX_rd;
 
   /***** EX/MEM pipeline registers *****/
   // From the control unit
@@ -76,17 +76,15 @@ module cpu(input reset,       // positive reset signal
   reg EX_MEM_mem_to_reg;    // will be used in WB stage
   reg EX_MEM_reg_write;     // will be used in WB stage
   // From others
-  reg EX_MEM_alu_out;
-  reg EX_MEM_dmem_data;
-  reg EX_MEM_rd;
+  reg [31:0] EX_MEM_alu_out;
+  reg [31:0] EX_MEM_dmem_data;
+  reg [4:0] EX_MEM_rd;
 
   /***** MEM/WB pipeline registers *****/
   // From the control unit
   reg MEM_WB_mem_to_reg;    // will be used in WB stage
   reg MEM_WB_reg_write;     // will be used in WB stage
-  // From others
-  reg MEM_WB_mem_to_reg_src_1;
-  reg MEM_WB_mem_to_reg_src_2;
+  reg [31:0] MEM_WB_mem_dout;
 
   // ---------- Update program counter ----------
   // PC must be updated on the rising edge (positive edge) of the clock.
@@ -146,7 +144,7 @@ module cpu(input reset,       // positive reset signal
   );
 
   // ---------- Immediate Generator ----------
-  ImmediateGenerator imm_gen(
+  immediate_generator imm_gen(
     .part_of_inst(IF_ID_inst),  // input
     .imm_gen_out(imm_gen_out)    // output
   );
@@ -186,7 +184,7 @@ module cpu(input reset,       // positive reset signal
   end
 
   // ---------- ALU Control Unit ----------
-  ALUControlUnit alu_ctrl_unit (
+  alu_control_unit alu_ctrl_unit (
     .part_of_inst(ID_EX_ALU_ctrl_unit_input),  // input
     .alu_op(alu_op)         // output
   );
@@ -199,7 +197,7 @@ module cpu(input reset,       // positive reset signal
     .out (alu_in_2)
   );
   
-  ALU alu (
+  alu alu (
     .alu_op(alu_op),      // input
     .alu_in_1(ID_EX_rs1_data),    // input  
     .alu_in_2(alu_in_2),    // input
@@ -264,22 +262,20 @@ module cpu(input reset,       // positive reset signal
     if (reset) begin
       MEM_WB_mem_to_reg <= 0;
       MEM_WB_reg_write <= 0;
-      MEM_WB_mem_to_reg_src_1 <= 0;
-      MEM_WB_mem_to_reg_src_2 <= 0;
       MEM_WB_alu_out <= 0;
+      MEM_WB_mem_dout <= 0;
     end
     else begin
       MEM_WB_mem_to_reg <= EX_MEM_mem_to_reg;
       MEM_WB_reg_write <= EX_MEM_reg_write;
-      MEM_WB_mem_to_reg_src_1 <= EX_MEM_alu_out; 
-      MEM_WB_mem_to_reg_src_2 <= mem_dout; 
-      MEM_WB_alu_out <= EX_MEM_alu_out;
+      MEM_WB_alu_out <= EX_MEM_alu_out; 
+      MEM_WB_mem_dout <= mem_dout;
     end
   end
 
   mux2 final_mux(
     .in0(MEM_WB_alu_out),
-    .in1(mem_dout),
+    .in1(MEM_WB_mem_dout),
     .sel(MEM_WB_mem_to_reg),
     .out(rd_din)
   );
