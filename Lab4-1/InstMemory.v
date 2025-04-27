@@ -27,4 +27,3 @@ module InstMemory #(parameter MEM_DEPTH = 1024) (input reset,
   end
 
 endmodule
-
