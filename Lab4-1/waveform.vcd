@@ -177,7 +177,7 @@ $timescale 1ps $end
     $var wire 32 p! MEM_WB_mem_dout [31:0] $end
     $var wire 5 q! MEM_WB_rd [4:0] $end
     $var wire 1 r! MEM_WB_is_halted $end
-    $var wire 32 s! forwarding_rs1_dout [31:0] $end
+    $var wire 32 s! true_rs1_dout [31:0] $end
     $scope module alu $end
      $var wire 5 t! alu_op [4:0] $end
      $var wire 32 u! alu_in_1 [31:0] $end

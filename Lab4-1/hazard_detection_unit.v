@@ -15,5 +15,4 @@ module hazard_detection_unit(
         is_ecall_hazard = is_ecall && (ID_EX_rd == 17 || (EX_MEM_rd == 17 && EX_MEM_mem_read));
         is_stall = is_load || is_ecall_hazard;
     end
-
 endmodule

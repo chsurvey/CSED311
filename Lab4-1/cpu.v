@@ -129,7 +129,7 @@ module cpu(input reset,       // positive reset signal
   end
 
   // ---------- Register File ----------
-  always @(is_ecall or IF_ID_inst) begin
+  always @(*) begin
     if (is_ecall)
         rs1 = 5'b10001;  
     else
@@ -202,7 +202,7 @@ module cpu(input reset,       // positive reset signal
       ID_EX_mem_read <= mem_read;
       ID_EX_mem_to_reg <= mem_to_reg;
       ID_EX_reg_write <= write_enable;
-      ID_EX_rs1_data <= forwarding_rs1_dout;//rs1_dout; 
+      ID_EX_rs1_data <= true_rs1_dout;
       ID_EX_rs2_data <= rs2_dout; 
       ID_EX_imm <= imm_gen_out;
       ID_EX_ALU_ctrl_unit_input <= {IF_ID_inst[31:25], IF_ID_inst[14:12], IF_ID_inst[6:0]};
