@@ -125,6 +125,7 @@ module cpu(input reset,       // positive reset signal
     .current_pc(current_pc),
     .acc_pc(ID_EX_pc),
     .acc_taken(is_taken),
+    .acc_branch_attempt(ID_EX_is_jal | ID_EX_is_jalr | ID_EX_branch),
     .pred_pc(pred_pc),
     .pred_taken(pred_taken)
   );
@@ -318,15 +319,15 @@ module cpu(input reset,       // positive reset signal
 
   wire is_flush, is_taken, is_correct;
   assign is_taken = ID_EX_is_jal | ID_EX_is_jalr | (ID_EX_branch & alu_bcond);
-  assign is_correct = (correct_pc == IF_ID_pc);
-  assign is_flush = (is_taken & !ID_EX_pred_taken) | (ID_EX_pred_taken & !is_correct);
+  assign is_correct = (correct_pc == IF_ID_pc) | ID_EX_pc == 0;
+  assign is_flush = !is_correct;
 
   wire [31:0] temp_next;
   assign pc_src = ID_EX_is_jal | (ID_EX_branch & alu_bcond);
 
   wire [31:0] correct_pc;
   mux2 pc_mux(
-    .in0 (current_pc + 32'd4),
+    .in0 (ID_EX_pc + 32'd4),
     .in1 (ID_EX_pc + ID_EX_imm),
     .sel (pc_src),
     .out (temp_next)
