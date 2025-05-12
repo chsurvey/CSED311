@@ -11,7 +11,7 @@ module hazard_detection_unit(
     reg is_load;
     reg is_ecall_hazard;
     always @(*) begin
-        is_load = (rs1 == ID_EX_rd | rs2 == ID_EX_rd) & ID_EX_mem_read;
+        is_load = (rs1 == ID_EX_rd | rs2 == ID_EX_rd) & ID_EX_mem_read & ID_EX_rd != 0;
         is_ecall_hazard = is_ecall & (ID_EX_rd == 17 | (EX_MEM_rd == 17 & EX_MEM_mem_read));
         is_stall = is_load | is_ecall_hazard;
     end

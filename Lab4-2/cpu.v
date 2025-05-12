@@ -14,7 +14,7 @@ module cpu(input reset,       // positive reset signal
            output [31:0]print_reg[0:31]); // Whehther to finish simulation
   /***** Wire declarations *****/
   wire [31:0] current_pc;
-  wire [31:0] next_pc;
+  wire [31:0] next_pc, pred_pc;
   wire [31:0] inst;
   wire [31:0] rs1_dout;
   wire [31:0] rs2_dout;
@@ -42,6 +42,7 @@ module cpu(input reset,       // positive reset signal
   wire [1:0] forwardA;
   wire [1:0] forwardB;
   wire [31:0] ori_alu_in_2;
+  wire tag_hit;
 
 
   reg ID_EX_is_jal;
@@ -64,6 +65,7 @@ module cpu(input reset,       // positive reset signal
   // 2. You might not need registers described below
   /***** IF/ID pipeline registers *****/
   reg [31:0]IF_ID_inst;           // will be used in ID stage
+  reg IF_ID_pred_taken;
   /***** ID/EX pipeline registers *****/
   // From the control unit
   reg ID_EX_alu_op;         // will be used in EX stage
@@ -72,6 +74,7 @@ module cpu(input reset,       // positive reset signal
   reg ID_EX_mem_read;       // will be used in MEM stage
   reg ID_EX_mem_to_reg;     // will be used in WB stage
   reg ID_EX_reg_write;      // will be used in WB stage
+  reg ID_EX_pred_taken;
   // From others
   reg [31:0] ID_EX_rs1_data;
   reg [31:0] ID_EX_rs2_data;
@@ -113,6 +116,20 @@ module cpu(input reset,       // positive reset signal
 
   // ---------- Update program counter ----------
   // PC must be updated on the rising edge (positive edge) of the clock.
+
+  wire pred_taken;
+  pc_predictor PcPred(
+    .reset(reset),
+    .clk(clk),
+    .write_enable(is_taken),
+    .current_pc(current_pc),
+    .acc_pc(ID_EX_pc),
+    .pred_pc(pred_pc),
+    .pred_taken(pred_taken)
+  );
+  
+  assign next_pc = is_flush ? correct_pc : pred_pc;
+
   PC pc(
     .reset(reset),       // input (Use reset to initialize PC. Initial value must be 0)
     .clk(clk),         // input
@@ -136,16 +153,18 @@ module cpu(input reset,       // positive reset signal
       IF_ID_inst <= 32'b0;
       IF_ID_pc <= 0;
       IF_ID_is_flush <= 0;
+      IF_ID_pred_taken <= 0;
     end
-    // else if (is_taken) begin
+    // else if (is_flush) begin
     //   IF_ID_inst <= 32'b0;
     //   IF_ID_pc <= 0;
-    //   IF_ID_is_flush <= is_taken;
+    //   IF_ID_is_flush <= is_flush;
     // end
     else if (!is_stall) begin
       IF_ID_inst <= inst;
       IF_ID_pc <= current_pc;
-      IF_ID_is_flush <= is_taken;
+      IF_ID_is_flush <= is_flush;
+      IF_ID_pred_taken <= pred_taken;
     end
   end
 
@@ -196,7 +215,7 @@ module cpu(input reset,       // positive reset signal
 
   // Update ID/EX pipeline registers here
   always @(posedge clk) begin
-    if (reset | is_stall | is_taken | IF_ID_is_flush) begin
+    if (reset | is_stall | is_flush | IF_ID_is_flush) begin
       ID_EX_is_jal <= 0;
       ID_EX_is_jalr <= 0;
       ID_EX_branch <= 0;
@@ -214,6 +233,7 @@ module cpu(input reset,       // positive reset signal
       ID_EX_rs1 <= 0;
       ID_EX_rs2 <= 0;
       ID_EX_pc <= 0;
+      ID_EX_pred_taken <= 0;
     end
     else begin
       ID_EX_is_jal <= is_jal;
@@ -234,6 +254,7 @@ module cpu(input reset,       // positive reset signal
       ID_EX_rs2 <= rs2;
       ID_EX_pc_to_reg <= pc_to_reg;
       ID_EX_pc <= IF_ID_pc;
+      ID_EX_pred_taken <= IF_ID_pred_taken;
     end
   end
 
@@ -294,14 +315,17 @@ module cpu(input reset,       // positive reset signal
     .alu_bcond(alu_bcond)     // output
   );
 
-  wire is_taken;
+  wire is_flush, is_taken, is_correct;
   assign is_taken = ID_EX_is_jal | ID_EX_is_jalr | (ID_EX_branch & alu_bcond);
-  
+  assign is_correct = (correct_pc == IF_ID_pc);
+  assign is_flush = (is_taken & !ID_EX_pred_taken) | (ID_EX_pred_taken & !is_correct);
+
   wire [31:0] temp_next;
   assign pc_src = ID_EX_is_jal | (ID_EX_branch & alu_bcond);
 
+  wire [31:0] correct_pc;
   mux2 pc_mux(
-    .in0 (current_pc+32'd4),
+    .in0 (current_pc + 32'd4),
     .in1 (ID_EX_pc + ID_EX_imm),
     .sel (pc_src),
     .out (temp_next)
@@ -310,7 +334,7 @@ module cpu(input reset,       // positive reset signal
     .in0 (temp_next),
     .in1 (alu_result),
     .sel (ID_EX_is_jalr),
-    .out (next_pc)
+    .out (correct_pc)
   );
 
   // Update EX/MEM pipeline registers here
