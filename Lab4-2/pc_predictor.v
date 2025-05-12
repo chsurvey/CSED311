@@ -18,7 +18,10 @@ module pc_predictor (
     reg [24:0] tag_el;
     reg [31:0] btb_el;
 
-    reg  [1:0] pht;
+    reg [1:0] pht_mem [31:0];
+    reg [31:0] bhsr;
+    wire [4:0] acc_pht_idx;
+    assign acc_pht_idx = acc_btb_idx ^ bhsr[4:0];
 
     always @(*) begin
         tag_el = tag_mem[btb_idx];
@@ -29,17 +32,18 @@ module pc_predictor (
     wire [31:0] target;
     assign hit = (tag_el == tag);
     always @(*) begin
-        pred_taken = hit & btb_el!=0 & pht[1];
+        pred_taken = hit & btb_el!=0 & pht_mem[acc_pht_idx][1];
         pred_pc = pred_taken ? btb_el : (current_pc + 32'd4);
     end
 
     integer i;
     always @(posedge clk) begin
+        bhsr <= {acc_taken, bhsr[31:1]};
         if (reset) begin
-            pht <= 0;
             for (i = 0; i < 32; i = i + 1) begin
                 tag_mem[i] <= 0;
                 btb_mem[i] <= 0;
+                pht_mem[i] <= 0;
             end
         end
         else if (write_enable) begin      // write_enable
@@ -47,15 +51,15 @@ module pc_predictor (
             btb_mem[acc_btb_idx] <= acc_pc;
         end
 
-        case ({acc_taken, pht})
-            3'b000: pht <= 2'b00;
-            3'b001: pht <= 2'b00;
-            3'b010: pht <= 2'b01;
-            3'b011: pht <= 2'b10;
-            3'b100: pht <= 2'b01;
-            3'b101: pht <= 2'b10;
-            3'b110: pht <= 2'b11;
-            3'b111: pht <= 2'b11;
+        case ({acc_taken, pht_mem[acc_pht_idx]})
+            3'b000: pht_mem[acc_pht_idx] <= 2'b00;
+            3'b001: pht_mem[acc_pht_idx] <= 2'b00;
+            3'b010: pht_mem[acc_pht_idx] <= 2'b01;
+            3'b011: pht_mem[acc_pht_idx] <= 2'b10;
+            3'b100: pht_mem[acc_pht_idx] <= 2'b01;
+            3'b101: pht_mem[acc_pht_idx] <= 2'b10;
+            3'b110: pht_mem[acc_pht_idx] <= 2'b11;
+            3'b111: pht_mem[acc_pht_idx] <= 2'b11;
         endcase
     end
     
