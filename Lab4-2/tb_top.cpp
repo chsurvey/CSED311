@@ -28,7 +28,7 @@ void next_cycle(Vtop* dut, VerilatedVcdC* m_trace) {
 
 int main(int argc, char** argv, char** env) {
     // TO DO : CHANGE "filename" TO PROVIDED "answer_*.txt" PATH
-    string filename = "./student_tb/answer_loop.txt";
+    string filename = "./student_tb/answer_non-controlflow_with_data_forwarding.txt";
     ifstream file(filename);
     stringstream ss;
     string reg_hex;
@@ -63,6 +63,11 @@ int main(int argc, char** argv, char** env) {
     while (sim_time < MAX_SIM_TIME) {
         next_cycle(dut, m_trace);
         if (dut->is_halted == 1) break;
+        // cout << "Registers 14-17: "
+        //      << hex << setw(8) << setfill('0') << dut->print_reg[14] << " "
+        //      << hex << setw(8) << setfill('0') << dut->print_reg[15] << " "
+        //      << hex << setw(8) << setfill('0') << dut->print_reg[16] << " "
+        //      << hex << setw(8) << setfill('0') << dut->print_reg[17] << endl;
     }
 
     int answer_cycle;
