@@ -124,6 +124,7 @@ module cpu(input reset,       // positive reset signal
     .write_enable(is_taken),
     .current_pc(current_pc),
     .acc_pc(ID_EX_pc),
+    .acc_taken(is_taken),
     .pred_pc(pred_pc),
     .pred_taken(pred_taken)
   );
