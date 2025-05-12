@@ -5,6 +5,7 @@ module pc_predictor (
     input [31:0] current_pc,
     input [31:0] acc_pc,
     input acc_taken,
+    input acc_branch_attempt,
     output reg [31:0] pred_pc,
     output pred_taken
 );
@@ -36,7 +37,7 @@ module pc_predictor (
     integer i;
     always @(posedge clk) begin
         if (reset) begin
-            pht <= 0;
+            pht <= 1;
             for (i = 0; i < 32; i = i + 1) begin
                 tag_mem[i] <= 0;
                 btb_mem[i] <= 0;
@@ -47,16 +48,18 @@ module pc_predictor (
             btb_mem[acc_btb_idx] <= acc_pc;
         end
 
-        case ({acc_taken, pht})
-            3'b000: pht <= 2'b00;
-            3'b001: pht <= 2'b00;
-            3'b010: pht <= 2'b01;
-            3'b011: pht <= 2'b10;
-            3'b100: pht <= 2'b01;
-            3'b101: pht <= 2'b10;
-            3'b110: pht <= 2'b11;
-            3'b111: pht <= 2'b11;
-        endcase
+        if (acc_branch_attempt) begin
+            case ({acc_taken, pht})
+                3'b000: pht <= 2'b00;
+                3'b001: pht <= 2'b00;
+                3'b010: pht <= 2'b01;
+                3'b011: pht <= 2'b10;
+                3'b100: pht <= 2'b01;
+                3'b101: pht <= 2'b10;
+                3'b110: pht <= 2'b11;
+                3'b111: pht <= 2'b11;
+            endcase
+        end
     end
     
 endmodule
