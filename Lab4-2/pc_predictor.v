@@ -45,7 +45,7 @@ module pc_predictor (
             for (i = 0; i < 32; i = i + 1) begin
                 tag_mem[i] <= 0;
                 btb_mem[i] <= 0;
-                pht_mem[i] <= 1;
+                pht_mem[i] <= 0;
             end
         end
         if (write_enable) begin      // write_enable
