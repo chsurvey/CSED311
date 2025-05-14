@@ -306,6 +306,7 @@ module cpu(input reset,       // positive reset signal
     .sel (pc_src),
     .out (temp_next)
   );
+  
   mux2 pc_mux2(
     .in0 (temp_next),
     .in1 (alu_result),
